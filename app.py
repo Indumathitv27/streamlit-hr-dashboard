@@ -12,13 +12,13 @@ query = st.text_area("SQL Query", height=150)
 @st.cache_resource
 def get_connection():
     return psycopg2.connect(
-        dbname="HR_Employee_Attrition",
-        user="postgres",
-        password="SRelajdu%27", 
-        host="127.0.0.1",
-        port="5432"
+        dbname=os.environ["DB_NAME"],
+        user=os.environ["DB_USER"],
+        password=os.environ["DB_PASSWORD"],
+        host=os.environ["DB_HOST"],
+        port=os.environ["DB_PORT"]
     )
-
+    
 # Query execution
 if st.button("Run Query"):
     conn = get_connection()
