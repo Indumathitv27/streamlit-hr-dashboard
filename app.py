@@ -13,32 +13,24 @@ def add_bg_from_local(image_file):
     st.markdown(
         f"""
         <style>
-        /* Background image */
         [data-testid="stAppViewContainer"] {{
             background-image: url("data:image/jpeg;base64,{encoded_string.decode()}");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
         }}
-
-        /* White overlay for better visibility */
         [data-testid="stAppViewContainer"] > .main {{
             background-color: rgba(255, 255, 255, 0.85);
             padding: 2rem;
             border-radius: 12px;
         }}
-
-        /* Sidebar transparency */
         [data-testid="stSidebar"] {{
             background-color: rgba(255, 255, 255, 0.9);
         }}
-
-        /* Font and input styling */
         .stTextInput, .stTextArea, .stSelectbox, .stButton, .stMarkdown {{
             color: #111111 !important;
             font-size: 16px !important;
         }}
-
         h1, h2, h3 {{
             color: #222222 !important;
         }}
@@ -99,11 +91,18 @@ if st.button("▶️ Run Query"):
         st.subheader("📄 SQL Query Submitted")
         st.code(query, language='sql')
 
-        if query_type == "SELECT" and query.strip().lower().startswith("select"):
+        query_lower = query.strip().lower()
+
+        # 🚨 Warn if DELETE or UPDATE without WHERE clause
+        if query_type in ["DELETE", "UPDATE"] and "where" not in query_lower:
+            st.warning(f"⚠️ Caution: You're about to run a {query_type} query without a WHERE clause. This may affect ALL rows!")
+
+        if query_type == "SELECT" and query_lower.startswith("select"):
             df = pd.read_sql(query, conn)
             with st.expander("🔽 View Query Results", expanded=True):
                 st.dataframe(df)
             st.success("✅ SELECT query executed successfully!")
+
         else:
             cursor.execute(query)
             conn.commit()
