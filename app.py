@@ -51,7 +51,7 @@ def add_bg_from_local(image_file):
 # Page configuration and layout
 # -----------------------------
 st.set_page_config(page_title="HR Employee Attrition - SQL Runner", layout="wide")
-add_bg_from_local("background.jpg")  # Make sure this file exists in the same directory
+add_bg_from_local("image.jpg")  # Make sure this file exists in the same directory
 
 # -----------------------------
 # Sidebar
