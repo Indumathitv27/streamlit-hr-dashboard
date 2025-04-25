@@ -49,10 +49,16 @@ add_bg_from_local("image.jpg")  # Make sure this file exists in the same directo
 # Sidebar
 # -----------------------------
 st.sidebar.header("🔍 Query Options")
+
 query_type = st.sidebar.selectbox(
     "Choose the type of query you want to run:",
     ("SELECT", "INSERT", "UPDATE", "DELETE")
 )
+
+# Show immediate warning for risky query types
+if query_type in ["DELETE", "UPDATE"]:
+    st.sidebar.warning("⚠️ Caution: DELETE and UPDATE queries can modify or remove many records. Always use a WHERE clause!")
+
 st.sidebar.markdown("---")
 st.sidebar.info("ℹ️ Paste your query below and click 'Run Query'")
 st.sidebar.success("Developed for HR Analytics 📊")
