@@ -3,14 +3,51 @@ import psycopg2
 import pandas as pd
 import os
 
+# -----------------------------
+# Sidebar for Query Type
+# -----------------------------
+st.sidebar.header("🔍 Query Options")
+query_type = st.sidebar.selectbox(
+    "Choose the type of query you want to run:",
+    ("SELECT", "INSERT", "UPDATE", "DELETE")
+)
+
+# Immediate warning if risky type selected
+if query_type in ["DELETE", "UPDATE"]:
+    st.sidebar.warning("⚠️ DELETE and UPDATE queries can modify records. Use WHERE clause carefully!")
+
+st.sidebar.markdown("---")
+st.sidebar.info("ℹ️ Paste your query below and click 'Run Query'")
+st.sidebar.success("Developed for HR Analytics 📊")
+
+# -----------------------------
+# Main Area
+# -----------------------------
 # Page title
 st.title("💼 HR Employee Attrition – SQL Query Runner")
+
+# Show Query Type
+st.subheader(f"Query Type Selected: {query_type}")
+
+# Show Example Syntax based on selected query type
+st.markdown("### 🛠️ Example Syntax")
+
+if query_type == "SELECT":
+    st.code("SELECT * FROM employees WHERE age > 30;")
+elif query_type == "INSERT":
+    st.code("INSERT INTO employees (employeeid, age, gender) VALUES (1001, 28, 'Male');")
+elif query_type == "UPDATE":
+    st.code("UPDATE employees SET age = 29 WHERE employeeid = 1001;")
+elif query_type == "DELETE":
+    st.code("DELETE FROM employees WHERE employeeid = 1001;")
 
 # Query input box
 st.markdown("Enter a SQL query below (e.g., `SELECT * FROM employees LIMIT 10`):")
 query = st.text_area("SQL Query", height=150)
 
+# -----------------------------
 # Query execution
+# -----------------------------
 if st.button("Run Query"):
     try:
         # Reconnect on every query run
@@ -30,10 +67,10 @@ if st.button("Run Query"):
         else:
             cursor.execute(query)
             conn.commit()
-            st.success("Query executed successfully.")
+            st.success("✅ Query executed successfully.")
 
     except Exception as e:
-        st.error(f"Error: {e}")
+        st.error(f"❌ Error: {e}")
 
     finally:
         # Safely close everything
