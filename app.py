@@ -2,46 +2,52 @@ import streamlit as st
 import psycopg2
 import pandas as pd
 import os
+import base64
 
 # Set up page configuration
 st.set_page_config(page_title="HR Employee Attrition – SQL Explorer", layout="wide")
 
-# Set background image using CSS
-page_bg_img = '''
-<style>
-[data-testid="stAppViewContainer"] {
-    background-image: url("https://www.google.com/search?q=office+image&sca_esv=c10bdb9112c5c8ba&udm=2&biw=1470&bih=831&sxsrf=AHTn8zof6hfhIjJhcTx13Mwfb1VHyrIfig%3A1745615734956&ei=dvsLaKj-Oaiq5NoPh7ahmAM&ved=0ahUKEwioka-ujfSMAxUoFVkFHQdbCDMQ4dUDCBE&uact=5&oq=office+image&gs_lp=EgNpbWciDG9mZmljZSBpbWFnZTIFEAAYgAQyBRAAGIAEMgUQABiABDIFEAAYgAQyBRAAGIAEMgUQABiABDIFEAAYgAQyBRAAGIAEMgUQABiABDIFEAAYgARIsRFQxwJYmRBwAXgAkAEAmAFSoAHaBKoBAjEwuAEDyAEA-AEBmAILoAKRBcICBhAAGAcYHsICDRAAGIAEGLEDGEMYigXCAgcQIxgnGMkCwgIKEAAYgAQYQxiKBcICChAAGIAEGLEDGArCAgcQABiABBgKwgIIEAAYgAQYsQPCAgsQABiABBixAxiDAZgDAIgGAZIHAjExoAfnOrIHAjEwuAeKBQ&sclient=img#vhid=Ax7m8cgYCromTM&vssid=mosaic");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
+# Function to add local image as background
+def add_bg_from_local(image_file):
+    with open(image_file, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read())
+    st.markdown(
+         f"""
+         <style>
+         [data-testid="stAppViewContainer"] {{
+             background-image: url("data:image/jpeg;base64,{encoded_string.decode()}");
+             background-size: cover;
+             background-position: center;
+             background-repeat: no-repeat;
+         }}
+         [data-testid="stSidebar"] {{
+             background-color: rgba(255, 255, 255, 0.7);
+         }}
+         </style>
+         """,
+         unsafe_allow_html=True
+     )
 
-[data-testid="stSidebar"] {
-    background-color: rgba(255, 255, 255, 0.7);
-}
-</style>
-'''
+# Add background image
+add_bg_from_local('image.jpg')
 
-# App Title
-st.title("💼 HR Employee Attrition – Interactive SQL Query Runner")
+# Title and description
+st.title("💼 HR Employee Attrition – SQL Query Runner")
+st.caption("🔹 Analyze attrition trends, salaries, and employee performance")
 
-# Sidebar for Inputs
+# Sidebar for Query Type
 st.sidebar.header("🔍 Query Options")
-
 query_type = st.sidebar.selectbox(
-    "Choose the type of query you want to run:",
+    "Select your query type:",
     ("SELECT", "INSERT", "UPDATE", "DELETE")
 )
 
-st.sidebar.markdown("---")
+st.sidebar.info("ℹ️ Paste your query below and click 'Run Query'!")
 
-st.sidebar.write("ℹ️ Paste your SQL query below and click Run:")
+# Text area for SQL input
+query = st.text_area("📝 Write your SQL Query here:", height=200)
 
-# Main Area
-st.subheader(f"Query Type: {query_type}")
-query = st.text_area("Write your SQL query here:", height=200)
-
-# Database connection function
+# Database Connection
 @st.cache_resource
 def get_connection():
     return psycopg2.connect(
@@ -52,23 +58,28 @@ def get_connection():
         port=os.environ["DB_PORT"]
     )
 
-# Execute query on button click
+# Query Execution
 if st.button("▶️ Run Query"):
     try:
         conn = get_connection()
         cursor = conn.cursor()
 
+        st.markdown("---")
+        st.subheader("📄 SQL Query You Submitted:")
+        st.code(query, language='sql')
+
         if query_type == "SELECT" and query.strip().lower().startswith("select"):
             df = pd.read_sql(query, conn)
-            st.success("✅ Query executed successfully! Here's the result:")
-            st.dataframe(df)
+            with st.expander("🔽 View Query Results", expanded=True):
+                st.dataframe(df)
+            st.success("✅ SELECT query executed successfully!")
         else:
             cursor.execute(query)
             conn.commit()
-            st.success("✅ Non-SELECT query executed successfully!")
+            st.success(f"✅ {query_type} query executed successfully!")
 
     except Exception as e:
-        st.error(f"❌ Error occurred while executing the query: {e}")
+        st.error(f"❌ Error executing query: {e}")
 
     finally:
         try:
@@ -78,4 +89,4 @@ if st.button("▶️ Run Query"):
             pass
 
 st.sidebar.markdown("---")
-st.sidebar.write("🛡️ **Tip:** Be cautious with DELETE/UPDATE commands.")
+st.sidebar.success("Developed for HR Analytics 📈")
