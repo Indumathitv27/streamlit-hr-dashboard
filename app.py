@@ -1,135 +1,38 @@
 import streamlit as st
-import pandas as pd
-import psycopg2
-import os
-import base64
-
-# -----------------------------
-# Function: Add background image and style
-# -----------------------------
-def add_bg_from_local(image_file):
-    with open(image_file, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read())
-    st.markdown(
-        f"""
-        <style>
-        [data-testid="stAppViewContainer"] {{
-            background-image: url("data:image/jpeg;base64,{encoded_string.decode()}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }}
-        [data-testid="stAppViewContainer"] > .main {{
-            background-color: rgba(255, 255, 255, 0.85);
-            padding: 2rem;
-            border-radius: 12px;
-        }}
-        [data-testid="stSidebar"] {{
-            background-color: rgba(255, 255, 255, 0.9);
-        }}
-        .stTextInput, .stTextArea, .stSelectbox, .stButton, .stMarkdown {{
-            color: #111111 !important;
-            font-size: 16px !important;
-        }}
-        h1, h2, h3 {{
-            color: #222222 !important;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-# -----------------------------
-# Page configuration and layout
-# -----------------------------
-st.set_page_config(page_title="HR Employee Attrition - SQL Runner", layout="wide")
-add_bg_from_local("image.jpg")  # Make sure image.jpg exists in same folder
-
-# -----------------------------
-# Sidebar
-# -----------------------------
-st.sidebar.header("🔍 Query Options")
-query_type = st.sidebar.selectbox(
-    "Choose the type of query you want to run:",
-    ("SELECT", "INSERT", "UPDATE", "DELETE")
-)
-
-# Warning if DELETE/UPDATE selected
-if query_type in ["DELETE", "UPDATE"]:
-    st.sidebar.warning("⚠️ Caution: DELETE and UPDATE queries can modify or remove many records. Always use a WHERE clause!")
-
-st.sidebar.markdown("---")
-st.sidebar.info("ℹ️ Paste your query below and click 'Run Query'")
-st.sidebar.success("Developed for HR Analytics 📊")
-
-# -----------------------------
-# Main Area
-# -----------------------------
-st.title("💼 HR Employee Attrition – SQL Query Runner")
-st.caption("🔹 Analyze attrition trends, salaries, and performance using live queries")
-
-st.subheader(f"Query Type Selected: {query_type}")
-
-# 🛠️ Example Syntax Display
-st.markdown("### 🛠️ Example Syntax")
-if query_type == "SELECT":
-    st.code("SELECT * FROM employees WHERE age > 30;")
-elif query_type == "INSERT":
-    st.code("INSERT INTO employees (employeeid, age, gender) VALUES (1001, 28, 'Male');")
-elif query_type == "UPDATE":
-    st.code("UPDATE employees SET age = 29 WHERE employeeid = 1001;")
-elif query_type == "DELETE":
-    st.code("DELETE FROM employees WHERE employeeid = 1001;")
-
-# SQL Query Input
-query = st.text_area("📝 Write your SQL Query here:", height=150)
-
-# -----------------------------
-# Database connection
-# -----------------------------
-@st.cache_resource
-def get_connection():
-    return psycopg2.connect(
-        dbname="HR_Employee_Attrition",
-        user="postgres",
-        password="SRelajdu%27",
-        host="127.0.0.1",
-        port="5432"
-    )
-
-# -----------------------------
-# Run Query Button
-# -----------------------------
-if st.button("▶️ Run Query"):
-    if not query.strip():
-        st.warning("⚠️ Please enter a SQL query before running.")
-    else:
-        conn = get_connection()
-        cursor = conn.cursor()
-        try:
-            st.markdown("---")
-            st.subheader("📄 SQL Query Submitted")
-            st.code(query, language='sql')
-
-            query_lower = query.strip().lower()
-
-            # 🚨 Extra warning if DELETE/UPDATE without WHERE
-            if query_type in ["DELETE", "UPDATE"] and "where" not in query_lower:
-                st.warning(f"⚠️ Caution: You're about to run a {query_type} query without a WHERE clause. This may affect ALL rows!")
-
-            if query_type == "SELECT" and query_lower.startswith("select"):
-                df = pd.read_sql(query, conn)
-                with st.expander("🔽 View Query Results", expanded=True):
-                    st.dataframe(df)
-                st.success("✅ SELECT query executed successfully!")
-            else:
-                cursor.execute(query)
-                conn.commit()
-                st.success(f"✅ {query_type} query executed successfully!")
-
-        except Exception as e:
-            st.error(f"❌ Error: {e}")
-
-        finally:
-            cursor.close()
-            conn.close()
+ import pandas as pd
+ import psycopg2
+ 
+ st.title("💼 HR Employee Attrition – SQL Query Runner")
+ 
+ # SQL input
+ st.markdown("Enter a SQL query below (e.g., `SELECT * FROM employees LIMIT 10`):")
+ query = st.text_area("SQL Query", height=150)
+ 
+ # DB connection
+ @st.cache_resource
+ def get_connection():
+     return psycopg2.connect(
+         dbname="HR_Employee_Attrition",
+         user="postgres",
+         password="SRelajdu%27", 
+         host="127.0.0.1",
+         port="5432"
+     )
+ 
+ # Query execution
+ if st.button("Run Query"):
+     conn = get_connection()
+     cursor = conn.cursor()
+     try:
+         if query.strip().lower().startswith("select"):
+             df = pd.read_sql(query, conn)
+             st.dataframe(df)
+         else:
+             cursor.execute(query)
+             conn.commit()
+             st.success("Query executed successfully.")
+     except Exception as e:
+         st.error(f"Error: {e}")
+     finally:
+         cursor.close()
+         conn.close()
