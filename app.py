@@ -2,6 +2,40 @@ import streamlit as st
 import psycopg2
 import pandas as pd
 import os
+import base64
+
+
+def add_bg_from_local(image_file):
+    with open(image_file, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read())
+    st.markdown(
+         f"""
+         <style>
+         [data-testid="stAppViewContainer"] {{
+             background-image: url("data:image/png;base64,{encoded_string.decode()}");
+             background-size: cover;
+             background-position: center;
+             background-repeat: no-repeat;
+         }}
+         [data-testid="stSidebar"] {{
+             background-color: rgba(255, 255, 255, 0.9);
+         }}
+         [data-testid="stAppViewContainer"] > .main {{
+             background-color: rgba(255, 255, 255, 0.85);
+             padding: 2rem;
+             border-radius: 12px;
+         }}
+         h1, h2, h3, h4, h5, h6, p {{
+             color: #111111;
+         }}
+         </style>
+         """,
+         unsafe_allow_html=True
+     )
+
+# Usage:
+add_bg_from_local('image.jpg')
+
 
 # -----------------------------
 # Sidebar for Query Type
