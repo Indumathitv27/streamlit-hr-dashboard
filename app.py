@@ -48,32 +48,20 @@ add_bg_from_local("image.jpg")  # Make sure this file exists in the same directo
 # -----------------------------
 # Sidebar
 # -----------------------------
+# Sidebar
 st.sidebar.header("🔍 Query Options")
-
 query_type = st.sidebar.selectbox(
     "Choose the type of query you want to run:",
     ("SELECT", "INSERT", "UPDATE", "DELETE")
 )
 
-# Show immediate warning for risky query types
 if query_type in ["DELETE", "UPDATE"]:
     st.sidebar.warning("⚠️ Caution: DELETE and UPDATE queries can modify or remove many records. Always use a WHERE clause!")
 
-# Show Syntax Example for the selected query type
 st.sidebar.markdown("---")
-st.sidebar.header("🛠️ Example Syntax")
+st.sidebar.info("ℹ️ Paste your query below and click 'Run Query'")
+st.sidebar.success("Developed for HR Analytics 📊")
 
-if query_type == "SELECT":
-    st.sidebar.code("SELECT * FROM employees WHERE age > 30;")
-
-elif query_type == "INSERT":
-    st.sidebar.code("INSERT INTO employees (employeeid, age, gender) VALUES (1001, 28, 'Male');")
-
-elif query_type == "UPDATE":
-    st.sidebar.code("UPDATE employees SET age = 29 WHERE employeeid = 1001;")
-
-elif query_type == "DELETE":
-    st.sidebar.code("DELETE FROM employees WHERE employeeid = 1001;")
 
 
 # -----------------------------
@@ -84,6 +72,31 @@ st.caption("🔹 Analyze attrition trends, salaries, and performance using live 
 
 st.subheader(f"Query Type: {query_type}")
 query = st.text_area("📝 Write your SQL Query here:", height=200)
+
+# Main Area
+st.title("💼 HR Employee Attrition – SQL Query Runner")
+st.caption("🔹 Analyze attrition trends, salaries, and performance using live queries")
+
+st.subheader(f"Query Type Selected: {query_type}")
+
+# 🛠️ Show Example Syntax Here
+st.markdown("### 🛠️ Example Syntax")
+
+if query_type == "SELECT":
+    st.code("SELECT * FROM employees WHERE age > 30;")
+
+elif query_type == "INSERT":
+    st.code("INSERT INTO employees (employeeid, age, gender) VALUES (1001, 28, 'Male');")
+
+elif query_type == "UPDATE":
+    st.code("UPDATE employees SET age = 29 WHERE employeeid = 1001;")
+
+elif query_type == "DELETE":
+    st.code("DELETE FROM employees WHERE employeeid = 1001;")
+
+# Query Input Area
+query = st.text_area("📝 Write your SQL Query here:", height=200)
+
 
 # -----------------------------
 # Database connection
