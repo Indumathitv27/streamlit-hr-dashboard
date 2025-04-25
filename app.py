@@ -48,7 +48,6 @@ add_bg_from_local("image.jpg")  # Make sure this file exists in the same directo
 # -----------------------------
 # Sidebar
 # -----------------------------
-# Sidebar
 st.sidebar.header("🔍 Query Options")
 query_type = st.sidebar.selectbox(
     "Choose the type of query you want to run:",
@@ -62,24 +61,15 @@ st.sidebar.markdown("---")
 st.sidebar.info("ℹ️ Paste your query below and click 'Run Query'")
 st.sidebar.success("Developed for HR Analytics 📊")
 
-
-
 # -----------------------------
 # Main Area
 # -----------------------------
-st.title("💼 HR Employee Attrition – SQL Query Runner")
-st.caption("🔹 Analyze attrition trends, salaries, and performance using live queries")
-
-st.subheader(f"Query Type: {query_type}")
-query = st.text_area("📝 Write your SQL Query here:", height=200)
-
-# Main Area
 st.title("💼 HR Employee Attrition – SQL Query Runner")
 st.caption("🔹 Analyze attrition trends, salaries, and performance using live queries")
 
 st.subheader(f"Query Type Selected: {query_type}")
 
-# 🛠️ Show Example Syntax Here
+# 🛠️ Example Syntax based on selected query type
 st.markdown("### 🛠️ Example Syntax")
 
 if query_type == "SELECT":
@@ -94,9 +84,8 @@ elif query_type == "UPDATE":
 elif query_type == "DELETE":
     st.code("DELETE FROM employees WHERE employeeid = 1001;")
 
-# Query Input Area
+# Query Input Area (only once)
 query = st.text_area("📝 Write your SQL Query here:", height=200)
-
 
 # -----------------------------
 # Database connection
@@ -125,16 +114,16 @@ if st.button("▶️ Run Query"):
 
         query_lower = query.strip().lower()
 
-        # 🚨 Warn if DELETE or UPDATE without WHERE clause
+        # 🚨 Warning if DELETE/UPDATE without WHERE
         if query_type in ["DELETE", "UPDATE"] and "where" not in query_lower:
             st.warning(f"⚠️ Caution: You're about to run a {query_type} query without a WHERE clause. This may affect ALL rows!")
 
+        # Execute query
         if query_type == "SELECT" and query_lower.startswith("select"):
             df = pd.read_sql(query, conn)
             with st.expander("🔽 View Query Results", expanded=True):
                 st.dataframe(df)
             st.success("✅ SELECT query executed successfully!")
-
         else:
             cursor.execute(query)
             conn.commit()
