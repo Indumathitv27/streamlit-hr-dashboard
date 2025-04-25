@@ -59,9 +59,22 @@ query_type = st.sidebar.selectbox(
 if query_type in ["DELETE", "UPDATE"]:
     st.sidebar.warning("⚠️ Caution: DELETE and UPDATE queries can modify or remove many records. Always use a WHERE clause!")
 
+# Show Syntax Example for the selected query type
 st.sidebar.markdown("---")
-st.sidebar.info("ℹ️ Paste your query below and click 'Run Query'")
-st.sidebar.success("Developed for HR Analytics 📊")
+st.sidebar.header("🛠️ Example Syntax")
+
+if query_type == "SELECT":
+    st.sidebar.code("SELECT * FROM employees WHERE age > 30;")
+
+elif query_type == "INSERT":
+    st.sidebar.code("INSERT INTO employees (employeeid, age, gender) VALUES (1001, 28, 'Male');")
+
+elif query_type == "UPDATE":
+    st.sidebar.code("UPDATE employees SET age = 29 WHERE employeeid = 1001;")
+
+elif query_type == "DELETE":
+    st.sidebar.code("DELETE FROM employees WHERE employeeid = 1001;")
+
 
 # -----------------------------
 # Main Area
