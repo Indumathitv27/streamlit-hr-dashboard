@@ -1,31 +1,46 @@
 import streamlit as st
-import psycopg2
 import pandas as pd
+import psycopg2
 import os
 
-# Set up page configuration
-st.set_page_config(page_title="HR Employee Attrition - SQL Runner", layout="wide")
+# Set up custom page configuration
+st.set_page_config(page_title="HR Employee Attrition – SQL Explorer", layout="wide")
 
-# App Title
-st.title("💼 HR Employee Attrition – Interactive SQL Query Runner")
+# Set background image using CSS
+page_bg_img = '''
+<style>
+[data-testid="stAppViewContainer"] {
+    background-image: url("https://images.unsplash.com/photo-1581090700227-1c065cfc8bc2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
 
-# Sidebar for Inputs
+[data-testid="stSidebar"] {
+    background-color: rgba(255, 255, 255, 0.7);
+}
+</style>
+'''
+
+st.markdown(page_bg_img, unsafe_allow_html=True)
+
+# Title and description
+st.title("💼 HR Employee Attrition – SQL Query Runner")
+st.caption("🔹 Analyze attrition trends, salaries, and employee performance in real-time")
+
+# Sidebar for Query Type
 st.sidebar.header("🔍 Query Options")
-
 query_type = st.sidebar.selectbox(
-    "Choose the type of query you want to run:",
+    "Select your query type:",
     ("SELECT", "INSERT", "UPDATE", "DELETE")
 )
 
-st.sidebar.markdown("---")
+st.sidebar.info("ℹ️ Paste your query below and click 'Run Query'!")
 
-st.sidebar.write("ℹ️ Paste your SQL query below and click Run:")
+# Text area for SQL input
+query = st.text_area("📝 Write your SQL Query here:", height=200)
 
-# Main Area
-st.subheader(f"Query Type: {query_type}")
-query = st.text_area("Write your SQL query here:", height=200)
-
-# Database connection function
+# Database Connection
 @st.cache_resource
 def get_connection():
     return psycopg2.connect(
@@ -36,23 +51,28 @@ def get_connection():
         port=os.environ["DB_PORT"]
     )
 
-# Execute query on button click
+# Query Execution
 if st.button("▶️ Run Query"):
     try:
         conn = get_connection()
         cursor = conn.cursor()
 
+        st.markdown("---")
+        st.subheader("📄 SQL Query You Submitted:")
+        st.code(query, language='sql')
+
         if query_type == "SELECT" and query.strip().lower().startswith("select"):
             df = pd.read_sql(query, conn)
-            st.success("✅ Query executed successfully! Here's the result:")
-            st.dataframe(df)
+            with st.expander("🔽 View Query Results", expanded=True):
+                st.dataframe(df)
+            st.success("✅ SELECT query executed successfully!")
         else:
             cursor.execute(query)
             conn.commit()
-            st.success("✅ Non-SELECT query executed successfully!")
+            st.success(f"✅ {query_type} query executed successfully!")
 
     except Exception as e:
-        st.error(f"❌ Error occurred while executing the query: {e}")
+        st.error(f"❌ Error executing query: {e}")
 
     finally:
         try:
@@ -62,4 +82,4 @@ if st.button("▶️ Run Query"):
             pass
 
 st.sidebar.markdown("---")
-st.sidebar.write("🛡️ **Tip:** Be cautious with DELETE/UPDATE commands.")
+st.sidebar.success("Developed for HR Analytics 📈")
