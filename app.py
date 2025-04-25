@@ -1,6 +1,6 @@
 import streamlit as st
-import psycopg2
 import pandas as pd
+import psycopg2
 import os
 import base64
 
@@ -43,7 +43,7 @@ def add_bg_from_local(image_file):
 # Page configuration and layout
 # -----------------------------
 st.set_page_config(page_title="HR Employee Attrition - SQL Runner", layout="wide")
-add_bg_from_local("image.jpg")  # Make sure this file exists in the same directory
+add_bg_from_local("image.jpg")  # Make sure image.jpg exists in same folder
 
 # -----------------------------
 # Sidebar
@@ -54,6 +54,7 @@ query_type = st.sidebar.selectbox(
     ("SELECT", "INSERT", "UPDATE", "DELETE")
 )
 
+# Warning if DELETE/UPDATE selected
 if query_type in ["DELETE", "UPDATE"]:
     st.sidebar.warning("⚠️ Caution: DELETE and UPDATE queries can modify or remove many records. Always use a WHERE clause!")
 
@@ -69,23 +70,19 @@ st.caption("🔹 Analyze attrition trends, salaries, and performance using live 
 
 st.subheader(f"Query Type Selected: {query_type}")
 
-# 🛠️ Example Syntax based on selected query type
+# 🛠️ Example Syntax Display
 st.markdown("### 🛠️ Example Syntax")
-
 if query_type == "SELECT":
     st.code("SELECT * FROM employees WHERE age > 30;")
-
 elif query_type == "INSERT":
     st.code("INSERT INTO employees (employeeid, age, gender) VALUES (1001, 28, 'Male');")
-
 elif query_type == "UPDATE":
     st.code("UPDATE employees SET age = 29 WHERE employeeid = 1001;")
-
 elif query_type == "DELETE":
     st.code("DELETE FROM employees WHERE employeeid = 1001;")
 
-# Query Input Area (only once)
-query = st.text_area("📝 Write your SQL Query here:", height=200)
+# SQL Query Input
+query = st.text_area("📝 Write your SQL Query here:", height=150)
 
 # -----------------------------
 # Database connection
@@ -93,48 +90,46 @@ query = st.text_area("📝 Write your SQL Query here:", height=200)
 @st.cache_resource
 def get_connection():
     return psycopg2.connect(
-        dbname=os.environ["DB_NAME"],
-        user=os.environ["DB_USER"],
-        password=os.environ["DB_PASSWORD"],
-        host=os.environ["DB_HOST"],
-        port=os.environ["DB_PORT"]
+        dbname="HR_Employee_Attrition",
+        user="postgres",
+        password="SRelajdu%27",
+        host="127.0.0.1",
+        port="5432"
     )
 
 # -----------------------------
 # Run Query Button
 # -----------------------------
 if st.button("▶️ Run Query"):
-    try:
+    if not query.strip():
+        st.warning("⚠️ Please enter a SQL query before running.")
+    else:
         conn = get_connection()
         cursor = conn.cursor()
-
-        st.markdown("---")
-        st.subheader("📄 SQL Query Submitted")
-        st.code(query, language='sql')
-
-        query_lower = query.strip().lower()
-
-        # 🚨 Warning if DELETE/UPDATE without WHERE
-        if query_type in ["DELETE", "UPDATE"] and "where" not in query_lower:
-            st.warning(f"⚠️ Caution: You're about to run a {query_type} query without a WHERE clause. This may affect ALL rows!")
-
-        # Execute query
-        if query_type == "SELECT" and query_lower.startswith("select"):
-            df = pd.read_sql(query, conn)
-            with st.expander("🔽 View Query Results", expanded=True):
-                st.dataframe(df)
-            st.success("✅ SELECT query executed successfully!")
-        else:
-            cursor.execute(query)
-            conn.commit()
-            st.success(f"✅ {query_type} query executed successfully!")
-
-    except Exception as e:
-        st.error(f"❌ Error executing query: {e}")
-
-    finally:
         try:
+            st.markdown("---")
+            st.subheader("📄 SQL Query Submitted")
+            st.code(query, language='sql')
+
+            query_lower = query.strip().lower()
+
+            # 🚨 Extra warning if DELETE/UPDATE without WHERE
+            if query_type in ["DELETE", "UPDATE"] and "where" not in query_lower:
+                st.warning(f"⚠️ Caution: You're about to run a {query_type} query without a WHERE clause. This may affect ALL rows!")
+
+            if query_type == "SELECT" and query_lower.startswith("select"):
+                df = pd.read_sql(query, conn)
+                with st.expander("🔽 View Query Results", expanded=True):
+                    st.dataframe(df)
+                st.success("✅ SELECT query executed successfully!")
+            else:
+                cursor.execute(query)
+                conn.commit()
+                st.success(f"✅ {query_type} query executed successfully!")
+
+        except Exception as e:
+            st.error(f"❌ Error: {e}")
+
+        finally:
             cursor.close()
             conn.close()
-        except:
-            pass
