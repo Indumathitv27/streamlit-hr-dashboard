@@ -4,7 +4,23 @@ import pandas as pd
 import os
 
 # Set up page configuration
-st.set_page_config(page_title="HR Employee Attrition - SQL Runner", layout="wide")
+st.set_page_config(page_title="HR Employee Attrition – SQL Explorer", layout="wide")
+
+# Set background image using CSS
+page_bg_img = '''
+<style>
+[data-testid="stAppViewContainer"] {
+    background-image: url("https://www.google.com/search?q=office+image&sca_esv=c10bdb9112c5c8ba&udm=2&biw=1470&bih=831&sxsrf=AHTn8zof6hfhIjJhcTx13Mwfb1VHyrIfig%3A1745615734956&ei=dvsLaKj-Oaiq5NoPh7ahmAM&ved=0ahUKEwioka-ujfSMAxUoFVkFHQdbCDMQ4dUDCBE&uact=5&oq=office+image&gs_lp=EgNpbWciDG9mZmljZSBpbWFnZTIFEAAYgAQyBRAAGIAEMgUQABiABDIFEAAYgAQyBRAAGIAEMgUQABiABDIFEAAYgAQyBRAAGIAEMgUQABiABDIFEAAYgARIsRFQxwJYmRBwAXgAkAEAmAFSoAHaBKoBAjEwuAEDyAEA-AEBmAILoAKRBcICBhAAGAcYHsICDRAAGIAEGLEDGEMYigXCAgcQIxgnGMkCwgIKEAAYgAQYQxiKBcICChAAGIAEGLEDGArCAgcQABiABBgKwgIIEAAYgAQYsQPCAgsQABiABBixAxiDAZgDAIgGAZIHAjExoAfnOrIHAjEwuAeKBQ&sclient=img#vhid=Ax7m8cgYCromTM&vssid=mosaic");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+[data-testid="stSidebar"] {
+    background-color: rgba(255, 255, 255, 0.7);
+}
+</style>
+'''
 
 # App Title
 st.title("💼 HR Employee Attrition – Interactive SQL Query Runner")
