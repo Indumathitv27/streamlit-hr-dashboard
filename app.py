@@ -21,26 +21,29 @@ def add_bg_from_local(image_file):
             background-repeat: no-repeat;
         }}
 
-        /* White overlay for better visibility */
+        /* White overlay for contrast */
         [data-testid="stAppViewContainer"] > .main {{
-            background-color: rgba(255, 255, 255, 0.85);
+            background-color: rgba(0, 0, 0, 0.6);  /* darker overlay */
             padding: 2rem;
             border-radius: 12px;
         }}
 
-        /* Sidebar transparency */
         [data-testid="stSidebar"] {{
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(0, 0, 0, 0.7);
         }}
 
-        /* Font and input styling */
-        .stTextInput, .stTextArea, .stSelectbox, .stButton, .stMarkdown {{
-            color: #111111 !important;
+        /* All input, button, and text font styles */
+        .stTextInput, .stTextArea, .stSelectbox, .stButton, .stMarkdown, .stDataFrame {{
+            color: #ffffff !important;
             font-size: 16px !important;
         }}
 
-        h1, h2, h3 {{
-            color: #222222 !important;
+        h1, h2, h3, h4, h5, h6, .stCaption, .stCodeBlock, .stAlert {{
+            color: #ffffff !important;
+        }}
+
+        .css-1v0mbdj p {{
+            color: #ffffff !important;
         }}
         </style>
         """,
